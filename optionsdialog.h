@@ -16,6 +16,7 @@
 #include <QHash>
 #include <QFrame>
 #include "commonunits.h"
+#include "rosco.h"
 
 class OptionsDialog : public QDialog
 {
@@ -23,8 +24,8 @@ class OptionsDialog : public QDialog
 
 public:
     OptionsDialog(QString title, QWidget *parent = 0);
-    QString getSerialDeviceName();
-    bool getSerialDeviceChanged() { return m_serialDeviceChanged; }
+    mems_ver getMemsVersion() { return m_memsVersion; }
+    bool getMemsVersionChanged() { return m_memsVersionChanged; }
     TemperatureUnits getTemperatureUnits() { return m_tempUnits; }
 
 protected:
@@ -32,8 +33,8 @@ protected:
 
 private:
     QGridLayout *m_grid;
-    QLabel *m_serialDeviceLabel;
-    QComboBox *m_serialDeviceBox;
+    QLabel *m_memsVersionLabel;
+    QComboBox *m_memsVersionBox;
 
     QLabel *m_temperatureUnitsLabel;
     QComboBox *m_temperatureUnitsBox;
@@ -45,15 +46,15 @@ private:
     QPushButton *m_okButton;
     QPushButton *m_cancelButton;
 
-    QString m_serialDeviceName;
+    mems_ver m_memsVersion;
     TemperatureUnits m_tempUnits;
 
-    bool m_serialDeviceChanged;
+    bool m_memsVersionChanged;
 
     const QString m_settingsFileName;
     const QString m_settingsGroupName;
 
-    const QString m_settingSerialDev;
+    const QString m_settingMemsVersion;
     const QString m_settingTemperatureUnits;
 
     void setupWidgets();

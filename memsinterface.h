@@ -13,12 +13,12 @@ class MEMSInterface : public QObject
 {
     Q_OBJECT
 public:
-    explicit MEMSInterface(QString device, QObject *parent = 0);
+    explicit MEMSInterface(mems_ver memsVersion, QObject *parent = 0);
     ~MEMSInterface();
 
-    void setSerialDevice(QString device) { m_deviceName = device; }
+    void setMemsVersion(mems_ver memsVersion) { m_memsVersion = memsVersion; }
 
-    QString getSerialDevice() { return m_deviceName; }
+    mems_ver getMemsVersion() { return m_memsVersion; }
     int getIntervalMsecs();
 
     bool isConnected();
@@ -49,7 +49,7 @@ signals:
     void readError();
     void readSuccess();
     void faultCodesClearSuccess();
-    void failedToConnect(QString dev);
+    void failedToConnect(mems_ver memsVersion);
     void interfaceThreadReady();
     void notConnected();
     void gotEcuId(uint8_t* id_buffer);
@@ -61,7 +61,7 @@ signals:
 
 private:
     mems_data m_data;
-    QString m_deviceName;
+    mems_ver m_memsVersion;
     mems_info m_memsinfo;
     bool m_stopPolling;
     bool m_shutdownThread;

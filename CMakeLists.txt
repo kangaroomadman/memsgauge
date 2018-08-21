@@ -70,7 +70,6 @@ add_executable (${PNAME} main.cpp
                          memsinterface.cpp
                          helpviewer.cpp
                          logger.cpp
-                         serialdevenumerator.cpp
                          mainwindow.cpp
                          aboutbox.cpp
                          optionsdialog.cpp
@@ -92,7 +91,8 @@ if (MINGW)
   # -fPIC appears to be redundant when building win32 binaries, so disable that flag
   string (REGEX REPLACE "-fPIC" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 
-  set (LIBROSCO_PATH "$ENV{SystemDrive}/mems-rosco")
+  set (LIBROSCO_PATH "$ENV{SystemDrive}/librosco")
+  message(STATUS "path: ${LIBROSCO_PATH}")
   include_directories ("${LIBROSCO_PATH}/include")
 
   message (STATUS "Defaulting installation path to: $ENV{SystemDrive}/${PNAME}")
@@ -117,11 +117,11 @@ if (MINGW)
     message (SEND_ERROR "Could not find libstdc++!")
   endif ()
 
-  find_library (ZLIB zlib1)
-  if (ZLIB)
-    message (STATUS "Found zlib1 at ${ZLIB}")
+  find_library (LIBWINPTHREAD libwinpthread-1)
+  if (LIBWINPTHREAD)
+    message (STATUS "Found libwinpthread at ${LIBWINPTHREAD}")
   else ()
-    message (SEND_ERROR "Could not find zlib1!")
+    message (SEND_ERROR "Could not find libwinpthread!")
   endif ()
 
   find_library (QTCORE_DLL Qt5Core)
@@ -152,7 +152,7 @@ if (MINGW)
     message (SEND_ERROR "Could not find Qt qwindows platform plugin!")
   endif ()
 
-  find_library(LIBROSCO_DLL librosco PATHS ${LIBROSCO_PATH} ${CMAKE_INSTALL_PREFIX})
+  find_library(LIBROSCO_DLL librosco PATHS ${LIBROSCO_PATH}/bin ${CMAKE_INSTALL_PREFIX})
   if (LIBROSCO_DLL)
     message (STATUS "Found librosco at ${LIBROSCO_DLL}")
   else ()
@@ -169,11 +169,11 @@ if (MINGW)
   install (FILES ${EXE_FILE}
                  ${LIBGCC}
                  ${LIBSTDCPP}
+                 ${LIBWINPTHREAD}
                  ${QTCORE_DLL}
                  ${QTGUI_DLL}
                  ${QTWIDGETS_DLL}
                  ${LIBROSCO_DLL}
-                 ${ZLIB}
            DESTINATION ".")
   install (FILES ${QWINDOWS_DLL} DESTINATION "platforms")
 

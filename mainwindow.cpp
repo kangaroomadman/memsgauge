@@ -25,7 +25,7 @@ m_mems(0), m_options(0), m_aboutBox(0), m_pleaseWaitBox(0), m_helpViewerDialog(0
       QString::number(VER_PATCH));
 
   m_options = new OptionsDialog(this->windowTitle(), this);
-  m_mems = new MEMSInterface(m_options->getSerialDeviceName());
+  m_mems = new MEMSInterface(m_options->getMemsVersion());
   m_logger = new Logger(m_mems);
 
   connect(m_mems, SIGNAL(dataReady()), this, SLOT(onDataReady()));
@@ -356,16 +356,16 @@ void MainWindow::onEditOptionsClicked()
     m_ui->m_waterTempGauge->setCritical(tempCritical);
     m_ui->m_waterTempGauge->repaint();
 
-    // if the user changed the serial device name and/or the polling
+    // if the user changed the mems version and/or the polling
     // interval, stop the timer, re-connect to the ECU (if neccessary),
     // and restart the timer
-    if (m_options->getSerialDeviceChanged())
+    if (m_options->getMemsVersionChanged())
     {
       if (m_mems->isConnected())
       {
         m_mems->disconnectFromECU();
       }
-      m_mems->setSerialDevice(m_options->getSerialDeviceName());
+      m_mems->setMemsVersion(m_options->getMemsVersion());
     }
   }
 }

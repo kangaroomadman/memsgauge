@@ -1,13 +1,12 @@
 #include <QSettings>
 #include "optionsdialog.h"
-#include "serialdevenumerator.h"
 
 /**
  * Constructor; sets up the options-dialog UI and sets settings-file field names.
  */
 OptionsDialog::OptionsDialog(QString title, QWidget * parent):QDialog(parent),
-m_serialDeviceChanged(false),
-m_settingsGroupName("Settings"), m_settingSerialDev("SerialDevice"), m_settingTemperatureUnits("TemperatureUnits")
+m_memsVersionChanged(false),
+m_settingsGroupName("Settings"), m_settingMemsVersion("MemsVersion"), m_settingTemperatureUnits("TemperatureUnits")
 {
   this->setWindowTitle(title);
   readSettings();
@@ -23,8 +22,8 @@ void OptionsDialog::setupWidgets()
 
   m_grid = new QGridLayout(this);
 
-  m_serialDeviceLabel = new QLabel("Serial device name:", this);
-  m_serialDeviceBox = new QComboBox(this);
+  m_memsVersionLabel = new QLabel("MEMS version:", this);
+  m_memsVersionBox = new QComboBox(this);
 
   m_temperatureUnitsLabel = new QLabel("Temperature units:", this);
   m_temperatureUnitsBox = new QComboBox(this);
@@ -36,19 +35,18 @@ void OptionsDialog::setupWidgets()
   m_okButton = new QPushButton("OK", this);
   m_cancelButton = new QPushButton("Cancel", this);
 
-  SerialDevEnumerator serialDevs;
-
-  m_serialDeviceBox->addItems(serialDevs.getSerialDevList(m_serialDeviceName));
-  m_serialDeviceBox->setEditable(true);
-  m_serialDeviceBox->setMinimumWidth(150);
+  m_memsVersionBox->addItem("1.6");
+  m_memsVersionBox->addItem("2J");
+  m_memsVersionBox->setEditable(false);
+  m_memsVersionBox->setCurrentIndex((int)m_memsVersion);
 
   m_temperatureUnitsBox->setEditable(false);
   m_temperatureUnitsBox->addItem("Fahrenheit");
   m_temperatureUnitsBox->addItem("Celsius");
   m_temperatureUnitsBox->setCurrentIndex((int)m_tempUnits);
 
-  m_grid->addWidget(m_serialDeviceLabel, row, 0);
-  m_grid->addWidget(m_serialDeviceBox, row++, 1);
+  m_grid->addWidget(m_memsVersionLabel, row, 0);
+  m_grid->addWidget(m_memsVersionBox, row++, 1);
 
   m_grid->addWidget(m_temperatureUnitsLabel, row, 0);
   m_grid->addWidget(m_temperatureUnitsBox, row++, 1);
@@ -67,19 +65,19 @@ void OptionsDialog::setupWidgets()
  */
 void OptionsDialog::accept()
 {
-  QString newSerialDeviceName = m_serialDeviceBox->currentText();
+  const mems_ver newMemsVersion = (mems_ver)m_memsVersionBox->currentIndex();
 
-  // set a flag if the serial device has been changed;
+  // set a flag if the mems version has been changed;
   // the main application needs to know if it should
-  // reconnect to the ECU
-  if (m_serialDeviceName.compare(newSerialDeviceName) != 0)
+  // reconnect to the ECU using the updated version
+  if (m_memsVersion != newMemsVersion)
   {
-    m_serialDeviceName = newSerialDeviceName;
-    m_serialDeviceChanged = true;
+    m_memsVersion = newMemsVersion;
+    m_memsVersionChanged = true;
   }
   else
   {
-    m_serialDeviceChanged = false;
+    m_memsVersionChanged = false;
   }
 
   m_tempUnits = (TemperatureUnits) (m_temperatureUnitsBox->currentIndex());
@@ -96,7 +94,7 @@ void OptionsDialog::readSettings()
   QSettings settings(QSettings::IniFormat, QSettings::UserScope, PROJECTNAME);
 
   settings.beginGroup(m_settingsGroupName);
-  m_serialDeviceName = settings.value(m_settingSerialDev, "").toString();
+  m_memsVersion = (mems_ver) settings.value(m_settingMemsVersion, MEMS_Version_16).toInt();
   m_tempUnits = (TemperatureUnits) (settings.value(m_settingTemperatureUnits, Fahrenheit).toInt());
 
   settings.endGroup();
@@ -110,20 +108,8 @@ void OptionsDialog::writeSettings()
   QSettings settings(QSettings::IniFormat, QSettings::UserScope, PROJECTNAME);
 
   settings.beginGroup(m_settingsGroupName);
-  settings.setValue(m_settingSerialDev, m_serialDeviceName);
+  settings.setValue(m_settingMemsVersion, m_memsVersion);
   settings.setValue(m_settingTemperatureUnits, m_tempUnits);
 
   settings.endGroup();
-}
-
-/**
- * Returns the name of the serial device.
- */
-QString OptionsDialog::getSerialDeviceName()
-{
-#ifdef WIN32
-  return QString("\\\\.\\%1").arg(m_serialDeviceName);
-#else
-  return m_serialDeviceName;
-#endif
 }

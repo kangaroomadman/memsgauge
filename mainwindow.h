@@ -73,8 +73,8 @@ private:
 
     Logger *m_logger;
 
-    static const float mapGaugeMaxPsi = 16.0;
-    static const float mapGaugeMaxKPa = 160.0;
+    static constexpr float mapGaugeMaxPsi = 16.0;
+    static constexpr float mapGaugeMaxKPa = 160.0;
 
     bool m_actuatorTestsEnabled;
 

@@ -9,8 +9,8 @@
  * @param device Name of (or path to) the serial device used to comminucate
  *  with the ECU.
  */
-MEMSInterface::MEMSInterface(QString device, QObject * parent):
-QObject(parent), m_deviceName(device), m_stopPolling(false), m_shutdownThread(false), m_initComplete(false)
+MEMSInterface::MEMSInterface(mems_ver memsVersion, QObject * parent):
+QObject(parent), m_memsVersion(memsVersion), m_stopPolling(false), m_shutdownThread(false), m_initComplete(false)
 {
   memset(&m_data, 0, sizeof(mems_data));
   memset(m_d0_response_buffer, 0, 4);
@@ -72,7 +72,7 @@ void MEMSInterface::onIdleAirControlMovementRequest(int desiredPos)
  */
 bool MEMSInterface::connectToECU()
 {
-  bool status = mems_connect(&m_memsinfo, m_deviceName.toStdString().c_str()) &&
+  bool status = mems_connect(&m_memsinfo) &&
     mems_init_link(&m_memsinfo, m_d0_response_buffer);
   if (status)
   {
@@ -123,7 +123,7 @@ void MEMSInterface::onParentThreadStarted()
   // it's in the context of the thread that will use it.
   if (!m_initComplete)
   {
-    mems_init(&m_memsinfo);
+    mems_init(&m_memsinfo, m_memsVersion);
     m_initComplete = true;
   }
 
@@ -145,17 +145,7 @@ void MEMSInterface::onStartPollingRequest()
   }
   else
   {
-#ifdef WIN32
-    QString simpleDeviceName = m_deviceName;
-
-    if (simpleDeviceName.indexOf("\\\\.\\") == 0)
-    {
-      simpleDeviceName.remove(0, 4);
-    }
-    emit failedToConnect(simpleDeviceName);
-#else
-    emit failedToConnect(m_deviceName);
-#endif
+    emit failedToConnect(m_memsVersion);
   }
 }
 
